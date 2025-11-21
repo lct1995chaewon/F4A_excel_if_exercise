@@ -2,460 +2,314 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新界喇沙中學 - Excel IF 函數智能練功坊</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>新界喇沙中學 - DSE ICT 智能學習平台</title>
     <style>
         :root {
-            /* --- 校本色調定義 (La Salle Colors) --- */
-            --school-navy: #002855;  /* 深海軍藍 (取代原本的綠色) */
-            --school-gold: #DAA520;  /* 耀眼金 (用於強調和按鈕) */
-            --school-gold-light: #F4C430; /* 亮金色 (用於hover) */
-            
-            --bg-color: #f4f7f9; /* 背景稍亮一點對比深藍 */
+            /* --- 校本色調 (La Salle Colors) --- */
+            --school-navy: #002855;
+            --school-gold: #DAA520;
+            --bg-color: #f4f7f9;
             --text-color: #333;
-            --border-color: #e1dfdd;
             --save-purple: #6b69d6;
-            --dse-tag: #d13438; /* DSE 警示維持紅色 */
+            --dse-tag: #d13438;
         }
 
         body {
-            font-family: "Segoe UI", "Microsoft JhengHei", "微軟正黑體", sans-serif;
-            margin: 0;
-            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0; padding: 0;
             background-color: var(--bg-color);
             color: var(--text-color);
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
+            display: flex; height: 100vh; overflow: hidden;
+        }
+
+        /* --- 手機版選單按鈕 --- */
+        .menu-toggle {
+            display: none; position: fixed; top: 15px; left: 15px; z-index: 1100;
+            background: var(--school-navy); color: var(--school-gold);
+            border: 2px solid var(--school-gold); border-radius: 4px;
+            padding: 6px 10px; font-size: 1.2rem; cursor: pointer;
         }
 
         /* --- 側邊欄 --- */
         .sidebar {
-            width: 280px;
-            background-color: white;
-            border-right: 3px solid var(--school-gold); /* 金色邊框點綴 */
-            display: flex;
-            flex-direction: column;
-            padding: 20px 0;
-            box-shadow: 4px 0 10px rgba(0,40,85,0.1);
-            overflow-y: auto;
+            width: 280px; background-color: white;
+            border-right: 3px solid var(--school-gold);
+            display: flex; flex-direction: column; padding: 20px 0;
+            box-shadow: 4px 0 10px rgba(0,40,85,0.1); overflow-y: auto;
+            transition: transform 0.3s ease-in-out; z-index: 1000;
         }
 
-        .school-badge {
-            text-align: center;
-            padding: 0 20px;
-            margin-bottom: 10px;
-        }
-        .school-name {
-            font-size: 1.1rem;
-            font-weight: 900;
-            color: var(--school-navy);
-            letter-spacing: 1px;
-        }
-
-        .sidebar h1 {
-            color: var(--school-navy);
-            font-size: 1rem;
-            padding: 0 20px;
-            margin-top: 5px;
-            margin-bottom: 10px;
-            font-weight: 700;
-            text-align: center;
-        }
+        .school-badge { text-align: center; padding: 0 20px; margin-bottom: 15px; }
+        .school-name { font-size: 1.1rem; font-weight: 900; color: var(--school-navy); letter-spacing: 1px; }
         
+        .sidebar h1 {
+            color: var(--school-navy); font-size: 1rem;
+            margin: 5px 0 5px 0; font-weight: 700; text-align: center; line-height: 1.4;
+        }
         .sidebar-subtitle {
-            padding: 0 20px;
-            font-size: 0.85rem;
-            color: #666;
-            margin-bottom: 25px;
-            border-bottom: 2px solid var(--school-gold);
-            padding-bottom: 15px;
-            text-align: center;
+            font-size: 0.8rem; color: #666; margin-bottom: 20px;
+            border-bottom: 1px solid #eee; padding-bottom: 15px; text-align: center;
         }
 
         .nav-group {
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: var(--school-navy);
-            padding: 15px 20px 5px 20px;
-            text-transform: uppercase;
-            opacity: 0.8;
+            font-size: 0.8rem; font-weight: bold; color: #888;
+            padding: 15px 20px 5px 20px; text-transform: uppercase;
         }
 
         .nav-btn {
-            background: none;
-            border: none;
-            padding: 12px 20px;
-            text-align: left;
-            font-size: 0.95rem;
-            cursor: pointer;
-            color: #444;
-            border-left: 4px solid transparent;
-            transition: 0.2s;
-            display: block;
-            width: 100%;
+            background: none; border: none; padding: 12px 20px;
+            text-align: left; font-size: 0.95rem; cursor: pointer;
+            color: #444; border-left: 4px solid transparent; transition: 0.2s;
+            width: 100%; display: block;
         }
-
         .nav-btn:hover { background-color: #f0f4f8; color: var(--school-navy); }
         .nav-btn.active { 
-            background-color: #e6eff7; 
-            color: var(--school-navy); 
-            border-left-color: var(--school-navy); 
-            font-weight: bold; 
+            background-color: #e6eff7; color: var(--school-navy); 
+            border-left-color: var(--school-navy); font-weight: bold; 
         }
-        
-        /* AI 按鈕改用金色強調 */
         .nav-btn.ai-btn { 
             color: var(--school-navy); font-weight: bold; 
             background: linear-gradient(to right, #fff, #fff9e6);
-            margin-top: 10px;
-            border: 1px solid var(--school-gold);
+            margin-top: 10px; border-top: 1px solid #eee;
         }
-        .nav-btn.ai-btn.active { 
-            background-color: var(--school-gold); 
-            border-left-color: var(--school-navy); 
-            color: var(--school-navy);
+        .nav-btn.ai-btn.active { background-color: #fffdf0; border-left-color: var(--school-gold); }
+
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 900; backdrop-filter: blur(2px);
         }
 
-        /* --- 主內容 --- */
+        /* --- 主內容區 --- */
         .main-content {
-            flex: 1;
-            padding: 30px 50px;
-            overflow-y: auto;
+            flex: 1; padding: 30px 50px; overflow-y: auto;
             background-image: radial-gradient(#e6eff7 1px, transparent 1px);
             background-size: 20px 20px;
         }
 
-        .chapter { display: none; max-width: 900px; margin: 0 auto; animation: fadeIn 0.4s; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .chapter { 
+            display: none; max-width: 900px; margin: 0 auto; 
+            background: white; padding: 30px; border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); animation: fadeIn 0.4s;
+        }
         .chapter.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         h2 { 
-            border-bottom: 3px solid var(--school-navy); 
-            padding-bottom: 10px; margin-bottom: 25px; 
-            color: var(--school-navy);
-            display: flex; align-items: center;
+            border-bottom: 2px solid var(--school-navy); padding-bottom: 10px; 
+            margin-bottom: 20px; color: var(--school-navy); font-size: 1.4rem;
+            font-weight: 700;
         }
-        h2::before { content: '📘'; margin-right: 10px; font-size: 1.2em; }
-        h3 { color: var(--school-navy); margin-top: 35px; border-left: 5px solid var(--school-gold); padding-left: 15px; }
+        h3 { color: var(--school-navy); margin-top: 25px; font-size: 1.1rem; border-left: 4px solid var(--school-gold); padding-left: 10px; }
 
-        /* --- 教學樣式 --- */
-        .concept-box {
-            background: #f9fcff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,40,85,0.05);
-            margin-bottom: 20px;
-            border: 1px solid #eef2f6;
-        }
-
-        .dse-tip {
-            background-color: #fff5f5;
-            border-left: 4px solid var(--dse-tag);
-            padding: 15px; margin: 20px 0; font-size: 0.95rem; color: #a80000;
-            border-radius: 0 8px 8px 0;
-        }
-
-        code {
-            background: #eee; color: #c7254e; padding: 2px 5px;
-            border-radius: 4px; font-family: Consolas, monospace;
-        }
-
+        .concept-box { background: #f8f9fa; padding: 15px; border-radius: 6px; border: 1px solid #e9ecef; margin-bottom: 20px; line-height: 1.6;}
+        .dse-tip { background: #fff5f5; border-left: 4px solid var(--dse-tag); padding: 15px; margin: 20px 0; color: #a80000; font-size: 0.9rem;}
         .formula-block {
-            background: var(--school-navy);
-            color: var(--school-gold);
-            padding: 15px; border-radius: 6px; font-family: Consolas, monospace;
-            margin: 15px 0; border-left: 5px solid var(--school-gold);
-            font-size: 1.1rem;
+            background: var(--school-navy); color: var(--school-gold);
+            padding: 12px; border-radius: 4px; font-family: Consolas, monospace;
+            margin: 10px 0; font-size: 0.95rem; word-break: break-all;
         }
 
-        table.ref-table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 0.95rem; }
-        table.ref-table th, table.ref-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        table.ref-table th { background: var(--school-navy); color: white; }
+        .table-responsive { width: 100%; overflow-x: auto; margin: 15px 0; border: 1px solid #ddd; }
+        table.ref-table, table.excel-view { width: 100%; border-collapse: collapse; white-space: nowrap; font-size: 0.9rem; }
+        th, td { padding: 8px 12px; border: 1px solid #ddd; text-align: left; }
+        th { background: var(--school-navy); color: white; font-weight: 600; }
+        table.excel-view th { background: #e6eff7; color: var(--school-navy); }
 
-        /* --- AI 控制面板 --- */
+        /* AI Controls */
         .ai-controls {
-            background: #f8fbff; padding: 25px; border-radius: 12px;
-            box-shadow: inset 0 0 10px rgba(0,40,85,0.05);
-            margin-bottom: 20px; border: 2px solid var(--school-gold);
+            background: #fff; padding: 20px; border-radius: 8px;
+            border: 1px solid #dee2e6; margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
         }
-        .control-row { display: flex; gap: 15px; margin-bottom: 20px; }
+        .control-row { display: flex; gap: 15px; margin-bottom: 15px; }
         .control-group { flex: 1; }
-        .control-group label { font-weight: bold; color: var(--school-navy); margin-bottom: 8px; display: block;}
-        select, input[type="text"] { width: 100%; padding: 12px; border-radius: 6px; border: 2px solid #cfe4fa; box-sizing: border-box; font-size: 1rem;}
-        select:focus, input[type="text"]:focus { border-color: var(--school-gold); outline: none; }
+        label { font-size: 0.9rem; font-weight: bold; color: #555; margin-bottom: 5px; display: block; }
+        
+        select, input[type="text"] { 
+            width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ccc; 
+            box-sizing: border-box; font-size: 0.95rem; background: white;
+        }
 
         .btn-generate {
-            background: var(--school-gold); color: var(--school-navy); border: none; width: 100%; padding: 15px;
-            cursor: pointer; font-weight: 900; transition: 0.2s; border-radius: 8px; font-size: 1.1rem;
-            display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 4px #c49217;
+            background: var(--school-navy); color: white; border: none; width: 100%; padding: 12px;
+            cursor: pointer; font-weight: 600; border-radius: 4px; font-size: 1rem;
+            display: flex; justify-content: center; align-items: center; transition: 0.2s;
         }
-        .btn-generate:hover { background: var(--school-gold-light); transform: translateY(-2px); box-shadow: 0 6px #c49217; }
-        .btn-generate:active { transform: translateY(2px); box-shadow: 0 2px #c49217; }
+        .btn-generate:hover { background: #003366; }
+        .btn-generate:disabled { background: #99aab5; cursor: wait; }
 
+        /* 題目卡片 */
         .question-card {
-            background: white; padding: 30px; border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0,40,85,0.1); margin-top: 25px;
-            display: none; border-top: 6px solid var(--school-gold); position: relative;
+            background: white; padding: 25px; border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-top: 20px;
+            display: none; border-top: 4px solid var(--school-gold); position: relative;
         }
-
         .level-badge {
-            position: absolute; top: -15px; right: 20px;
-            background: var(--school-navy); color: var(--school-gold); padding: 8px 15px; 
-            border-radius: 20px; font-size: 0.9rem; font-weight: bold; border: 2px solid var(--school-gold);
+            position: absolute; top: -12px; right: 15px;
+            background: var(--school-navy); color: white; padding: 4px 12px;
+            border-radius: 20px; font-size: 0.8rem;
         }
+        
+        .student-zone { margin-top: 25px; padding-top: 20px; border-top: 1px dashed #ccc; }
+        .action-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+        
+        .btn-check, .btn-save {
+            flex: 1; border: none; padding: 12px; cursor: pointer; border-radius: 4px; 
+            font-size: 1rem; font-weight: 600; color: white; min-width: 120px;
+        }
+        .btn-check { background: #28a745; }
+        .btn-check:hover { background: #218838; }
+        .btn-check:disabled { background: #ccc; cursor: not-allowed; }
+        .btn-save { background: var(--save-purple); }
 
-        table.excel-view { width: 100%; border-collapse: collapse; margin: 20px 0; font-family: monospace; border: 2px solid #ccc;}
-        table.excel-view th, table.excel-view td { border: 1px solid #ccc; padding: 10px; text-align: center; }
-        table.excel-view th { background: #e6eff7; color: var(--school-navy); font-weight: bold;}
-        table.excel-view td:first-child { background: #e6eff7; font-weight: bold; color: var(--school-navy);}
+        .feedback-box { margin-top: 20px; padding: 15px; border-radius: 6px; display: none; font-size: 0.95rem;}
+        .feedback-correct { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .feedback-wrong { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
-        .student-zone { margin-top: 25px; padding-top: 25px; border-top: 2px dashed var(--school-gold); }
-        .formula-input { width: 100%; padding: 12px; font-family: monospace; margin-bottom: 15px; border: 3px solid #ddd; font-size: 1.1rem;}
-        .formula-input:focus { border-color: var(--school-navy); }
-        
-        .action-buttons { display: flex; gap: 15px; }
-        .btn-check { flex: 2; background: var(--school-navy); color: white; border: none; padding: 12px; cursor: pointer; border-radius: 8px; font-size: 1rem; font-weight: bold;}
-        .btn-check:hover { background: #001a3a; }
-        .btn-save { flex: 1; background: var(--save-purple); color: white; border: none; padding: 12px; cursor: pointer; border-radius: 8px; font-size: 1rem;}
-        .btn-save:hover { background: #5a58a8; }
-        
-        .feedback-box { margin-top: 20px; padding: 20px; border-radius: 8px; display: none; font-size: 1.05rem; border: 2px solid transparent;}
-        .feedback-correct { background: #eafff3; color: #006837; border-color: #00c853; }
-        .feedback-wrong { background: #fff0f1; color: #c00000; border-color: #ff3d00; }
-        
         .spinner {
-            display: inline-block; width: 18px; height: 18px;
-            border: 3px solid rgba(255,255,255,0.5); border-top-color: var(--school-navy);
-            border-radius: 50%; animation: spin 1s infinite linear; margin-right: 10px; display: none;
+            display: inline-block; width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,0.5); border-top-color: white;
+            border-radius: 50%; animation: spin 1s infinite linear; margin-right: 8px; display: none;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* --- 進度條與證書 --- */
-        .progress-container {
-            margin-bottom: 20px; padding: 15px; background: #fffdf0; 
-            border-radius: 10px; border: 2px solid var(--school-gold);
-        }
-        .progress-title { font-weight: bold; color: var(--school-navy); margin-bottom: 10px; display: flex; justify-content: space-between; }
-        .progress-bar-bg { height: 20px; background: #e0e0e0; border-radius: 10px; overflow: hidden; }
-        .progress-bar-fill { height: 100%; background: linear-gradient(to right, var(--school-gold), #f7d977); width: 0%; transition: width 0.5s ease-in-out; }
-        
-        /* 證書彈窗 */
+        /* 進度條 */
+        .progress-container { margin-bottom: 20px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #eee; }
+        .progress-bar-bg { height: 10px; background: #e9ecef; border-radius: 5px; overflow: hidden; margin-top: 8px;}
+        .progress-bar-fill { height: 100%; background: var(--school-navy); width: 0%; transition: width 0.5s; }
+
+        /* 證書 */
         .certificate-modal {
-            display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%;
-            background-color: rgba(0,40,85, 0.8); align-items: center; justify-content: center;
-            animation: modalFadeIn 0.5s;
+            display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,40,85, 0.9); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;
         }
         .certificate-content {
-            background: white; width: 80%; max-width: 700px; padding: 40px; border-radius: 20px;
-            text-align: center; border: 8px solid var(--school-navy); outline: 4px solid var(--school-gold);
-            background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><text x="50%" y="50%" font-size="20" fill="%23f0f0f0" text-anchor="middle" dominant-baseline="middle">LA SALLE</text></svg>');
+            background: white; width: 100%; max-width: 600px; padding: 40px; border-radius: 4px;
+            text-align: center; border: 8px solid var(--school-navy); outline: 2px solid var(--school-gold); outline-offset: -12px;
+            position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-        .cert-header { color: var(--school-navy); font-size: 2.5rem; margin-bottom: 10px; font-weight: 900; }
-        .cert-sub { color: var(--school-gold); font-size: 1.5rem; margin-bottom: 30px; font-weight: bold;}
-        .cert-body { font-size: 1.2rem; line-height: 1.8; margin-bottom: 30px; color: #444; }
-        .cert-seal { font-size: 5rem; color: var(--school-gold); text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
-        .cert-date { margin-top: 20px; color: #888; }
+        .cert-header { font-size: 2rem; color: var(--school-navy); font-weight: 900; margin-bottom: 5px; letter-spacing: 2px;}
+        .cert-sub { font-size: 1.2rem; color: #666; margin-bottom: 30px; font-weight: 600; text-transform: uppercase;}
+        .cert-seal { font-size: 5rem; margin-top: 20px; color: var(--school-gold);}
         .btn-close-cert {
-            background: var(--school-navy); color: var(--school-gold); border: none; padding: 10px 30px;
-            font-size: 1.1rem; border-radius: 30px; cursor: pointer; margin-top: 30px; font-weight: bold;
+            background: var(--school-navy); color: white; border: none; padding: 10px 30px;
+            font-size: 1rem; border-radius: 4px; cursor: pointer; margin-top: 30px;
         }
-        @keyframes modalFadeIn { from {opacity: 0; transform: scale(0.8);} to {opacity: 1; transform: scale(1);} }
-        @keyframes celebrate { 0% {transform: scale(1);} 50% {transform: scale(1.1);} 100% {transform: scale(1);} }
 
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; top: 0; left: -290px; height: 100%; z-index: 1000; }
+            .sidebar.open { left: 0; }
+            .menu-toggle { display: block; }
+            .overlay.active { display: block; }
+            .main-content { padding: 60px 20px 30px 20px; }
+            .chapter { padding: 20px; }
+            .control-row { flex-direction: column; gap: 10px; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
+    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
         <div class="school-badge">
             <div class="school-name">新界喇沙中學</div>
         </div>
-        <h1>Excel IF 函數智能練功坊</h1>
-        <div class="sidebar-subtitle">DSE ICT 試算表專題</div>
+        <h1>DSE ICT 智能學習平台<br><span style="font-size:0.8em; font-weight:normal;">(IF 函數專題)</span></h1>
+        <div class="sidebar-subtitle">Spreadsheet Assessment System</div>
         
-        <div class="nav-group">核心教學 (Tutorial)</div>
+        <div class="nav-group">知識研習 (Tutorials)</div>
         <button class="nav-btn active" onclick="showChapter('t1')">1. 基礎語法與運算子</button>
         <button class="nav-btn" onclick="showChapter('t2')">2. 巢狀 IF (Nested IF)</button>
         <button class="nav-btn" onclick="showChapter('t3')">3. 複合邏輯 (AND/OR)</button>
-        <button class="nav-btn" onclick="showChapter('t4')">4. DSE 精選例題講解</button>
+        <button class="nav-btn" onclick="showChapter('t4')">4. DSE 題型範例</button>
         
-        <div class="nav-group" style="margin-top: 20px;">實戰演練 (Challenge)</div>
-        <button class="nav-btn ai-btn" onclick="showChapter('ai-tutor')">🤖 AI 智能出題 & 考證書</button>
+        <div class="nav-group" style="margin-top: 10px;">智能評估 (Assessment)</div>
+        <button class="nav-btn ai-btn" onclick="showChapter('ai-tutor')">🤖 題目生成與練習</button>
     </div>
 
     <div class="main-content">
-
         <div id="t1" class="chapter active">
-            <h2>基礎語法與 DSE 陷阱</h2>
-            <p class="concept-box">
-                IF 函數就像一個十字路口，根據條件的真假決定走哪條路。它是 DSE 試算表中最核心的函數。
-            </p>
-            
-            <h3>1.1 函數結構 (Syntax)</h3>
-            <div class="formula-block">
-                =IF( 邏輯測試, 真值結果(True), 假值結果(False) )
+            <h2>基礎語法與運算子</h2>
+            <p class="concept-box">IF 函數是 DSE 試算表 (Spreadsheet) 考核中的核心邏輯工具。</p>
+            <h3>1.1 語法結構 (Syntax)</h3>
+            <div class="formula-block">=IF(邏輯測試, 真值結果, 假值結果)</div>
+            <h3>1.2 常用比較運算子</h3>
+            <div class="table-responsive">
+                <table class="ref-table">
+                    <tr><th>符號</th><th>意義</th><th>範例</th></tr>
+                    <tr><td><code>=</code></td><td>等於</td><td><code>A1="M"</code></td></tr>
+                    <tr><td><code>&gt;</code></td><td>大於</td><td><code>B2>0</code></td></tr>
+                    <tr><td><code>&gt;=</code></td><td>大於等於</td><td><code>C2>=60</code></td></tr>
+                    <tr><td style="color:var(--dse-tag); font-weight:bold;">&lt;&gt;</td><td>不等於</td><td><code>D2<>"Absent"</code></td></tr>
+                </table>
             </div>
-            <ul>
-                <li><strong>邏輯測試：</strong> 任何可以判斷對錯的問題 (例如: `A1 >= 60`，今年是閏年嗎?)。</li>
-                <li><strong>真值結果：</strong> 當答案是 YES 時要顯示的內容。</li>
-                <li><strong>假值結果：</strong> 當答案是 NO 時要顯示的內容。</li>
-            </ul>
-
-            <h3>1.2 DSE 必考比較運算子</h3>
-            <table class="ref-table">
-                <tr><th width="100">符號</th><th>意義</th><th>DSE 應用範例</th></tr>
-                <tr><td><code>=</code></td><td>等於</td><td><code>A2 = "Male"</code> (判斷性別)</td></tr>
-                <tr><td><code>&gt;</code>, <code>&lt;</code></td><td>大於, 小於</td><td><code>B2 > 0</code> (判斷是否為正數)</td></tr>
-                <tr><td><code>&gt;=</code>, <code>&lt;=</code></td><td>大於等於, 小於等於</td><td><code>C2 >= 60</code> (判斷及格線)</td></tr>
-                <tr><td style="color:var(--dse-tag); font-weight:bold;">&lt;&gt;</td><td>不等於 (重點!)</td><td><code>D2 <> "缺席"</code> (判斷有出席的學生)</td></tr>
-            </table>
-
-            <div class="dse-tip">
-                <strong>🚨 DSE 常犯錯誤 - 引號的使用：</strong><br>
-                <ul>
-                    <li><strong>要加引號：</strong> 當結果是「文字」時。例如: <code>"及格"</code>, <code>"Outstanding"</code>。</li>
-                    <li><strong>不加引號：</strong> 當結果是「數字」或「公式運算」時。例如: <code>0</code>, <code>A1*0.5</code>。</li>
-                </ul>
-                ❌ 錯誤示範：<code>=IF(A1>100, "A1*0.9", A1)</code> <span style="color:#666;">(結果會顯示文字算式，而非計算結果)</span>
-            </div>
+            <div class="dse-tip">🚨 DSE 注意事項：文字必須加雙引號 (如 <code>"Pass"</code>)，數字則不需要。</div>
         </div>
 
         <div id="t2" class="chapter">
-            <h2>巢狀 IF (Nested IF) - 多重結果</h2>
-            <p class="concept-box">
-                當結果超過 2 種 (例如: 金/銀/銅牌，或 A/B/C/D 等級) 時，一個 IF 不夠用，我們需要「函數包函數」。想像成剝洋蔥，一層層篩選。
-            </p>
-
-            <h3>2.1 邏輯思維：洋蔥剝皮法</h3>
-            <p><strong>範例題目：</strong> 根據分數 (Cell A2) 給予等級。</p>
-            <ul>
-                <li>90 分或以上 → <strong>Grade A</strong></li>
-                <li>80 分或以上 (但未滿90) → <strong>Grade B</strong></li>
-                <li>其他 → <strong>Grade C</strong></li>
-            </ul>
-
-            <div class="formula-block">
-                =IF(A2>=90, "Grade A", IF(A2>=80, "Grade B", "Grade C"))
-            </div>
-            
-            <p><strong>運作解析：</strong></p>
-            <ol>
-                <li>電腦先看第1層：<code>A2>=90</code> 嗎？如果是，顯示 "Grade A"，收工。</li>
-                <li>如果不是（代表小於90），電腦進入假值結果，發現裡面還有一個 IF。</li>
-                <li>再看第2層：<code>A2>=80</code> 嗎？如果是，顯示 "Grade B"。</li>
-                <li>如果還不是（代表小於80），剩下的就只能是 "Grade C" 了。</li>
-            </ol>
-
-            <div class="dse-tip">
-                <strong>📝 考試技巧：N-1 原則</strong><br>
-                如果有 N 個可能的結果，通常需要 N-1 個 IF 函數嵌套。<br>
-                (例如: 3 個等級，需要 2 個 IF；4 個等級，需要 3 個 IF)。
-            </div>
+            <h2>巢狀 IF (Nested IF)</h2>
+            <p class="concept-box">當結果超過 2 種 (如 A/B/C 等級)，需使用多層 IF 函數。</p>
+            <div class="formula-block">=IF(A1>=90, "A", IF(A1>=50, "Pass", "Fail"))</div>
+            <p><strong>原則：</strong> N 個可能的結果，通常需要 N-1 個 IF 函數。</p>
         </div>
 
         <div id="t3" class="chapter">
-            <h2>複合邏輯 (AND / OR) - 多重條件</h2>
-            <p class="concept-box">
-                DSE 題目常出現「同時滿足 A 和 B」或「滿足 A 或 B 其中之一」的情況。這時不能只用 IF，必須配合 AND / OR 函數放入「邏輯測試」中。
-            </p>
-
-            <h3>3.1 AND 函數 (兩者皆是 / All must be TRUE)</h3>
-            <p><strong>語法：</strong> <code>AND(條件1, 條件2, ...)</code></p>
-            <p><strong>情境：</strong> 獎學金要求：中文(A2) <strong>及</strong> 英文(B2) 都要 80 分以上。</p>
-            <div class="formula-block">
-                =IF( AND(A2>=80, B2>=80), "獲獎", "未獲獎" )
-            </div>
-
-            <h3>3.2 OR 函數 (其中之一 / Any one is TRUE)</h3>
-            <p><strong>語法：</strong> <code>OR(條件1, 條件2, ...)</code></p>
-            <p><strong>情境：</strong> 優惠條件：持有長者卡(C2="Yes") <strong>或</strong> 年齡(D2)在 65 以上。</p>
-            <div class="formula-block">
-                =IF( OR(C2="Yes", D2>=65), "半價優惠", "原價" )
-            </div>
-
-            <div class="dse-tip">
-                <strong>⚠️ DSE 常見語法錯誤：</strong><br>
-                Excel 中沒有 <code>A2>=80 AND B2>=80</code> 這種寫法。<br>
-                ✅ 正確寫法必須是用函數包住條件：<code>AND(A2>=80, B2>=80)</code>。
-            </div>
+            <h2>複合邏輯 (AND / OR)</h2>
+            <h3>AND (所有條件皆為真)</h3>
+            <div class="formula-block">=IF(AND(A1>=50, B1>=50), "升班", "留班")</div>
+            <h3>OR (任一條件為真)</h3>
+            <div class="formula-block">=IF(OR(C1="Yes", D1>=65), "優惠", "原價")</div>
         </div>
-        
+
         <div id="t4" class="chapter">
-            <h2>DSE 精選例題講解</h2>
-            <p class="concept-box">
-                以下提供三題不同類型的 DSE 常見題型，供老師在課堂上示範講解。
-            </p>
-
-            <h3>例題 1：文字處理與判斷 (基礎應用)</h3>
-            <p><strong>情境：</strong> 在成績表中，如果學生是「缺席」(ABS)，分數欄(C2)顯示 0，否則顯示原本的分數。</p>
-            <table class="excel-view" style="width:50%; margin:10px 0;">
-                <tr><th></th><th>C (分數狀態)</th><th>D (最終分數)</th></tr>
-                <tr><td>2</td><td>ABS</td><td style="color:var(--school-gold); font-weight:bold;">?</td></tr>
-                <tr><td>3</td><td>85</td><td>85</td></tr>
-            </table>
-            <p><strong>參考公式 (D2)：</strong></p>
-            <div class="formula-block">
-                =IF(C2="ABS", 0, C2)
-            </div>
-            <p><strong>講解重點：</strong> 判斷文字 "ABS" 需要加引號，但回傳的數字 0 或儲存格參照 C2 不需要引號。</p>
-
-            <h3>例題 2：階梯式計算 (巢狀 IF 應用)</h3>
-            <p><strong>情境：</strong> 計算銷售佣金 (Commission)。銷售額(B2)在 10,000 以下無佣金；10,000 至 49,999 佣金為 5%；50,000 或以上佣金為 10%。</p>
-            <p><strong>參考公式 (C2)：</strong></p>
-            <div class="formula-block">
-                =IF(B2>=50000, B2*0.1, IF(B2>=10000, B2*0.05, 0))
-            </div>
-            <p><strong>講解重點：</strong> 建議「從大到小」判斷（先判斷 >=50000），邏輯會比較清晰，避免條件重疊的錯誤。</p>
-
-            <h3>例題 3：複合資格審查 (AND/OR 應用)</h3>
-            <p><strong>情境：</strong> 學校旅行資助審查。學生必須同時符合以下兩個條件才能獲得「全額資助」：<br>
-            1. 居住地區(D2) 是 "屯門" <strong>或</strong> "元朗"。<br>
-            2. 家庭收入(E2) 低於 15000。</p>
-            <p><strong>參考公式 (F2)：</strong></p>
-            <div class="formula-block">
-                =IF( AND( OR(D2="屯門", D2="元朗"), E2<15000 ), "全額資助", "不獲資助" )
-            </div>
-            <p><strong>講解重點：</strong> 這是最複雜的題型，AND 裡面包著 OR。先處理「地區」的 OR 條件，再將結果與「收入」條件用 AND 結合。</p>
+            <h2>DSE 題型範例</h2>
+            <div class="concept-box">以下為歷屆試題常見之應用情境。</div>
+            <h3>例題 1：缺席處理</h3>
+            <p>若狀態為 "ABS" 則分數為 0，否則顯示原分。</p>
+            <div class="formula-block">=IF(C2="ABS", 0, C2)</div>
+            <h3>例題 2：階梯式佣金 (巢狀 IF)</h3>
+            <p>業績 >=50000 (10%)，>=10000 (5%)，其餘 0。</p>
+            <div class="formula-block">=IF(B2>=50000, B2*0.1, IF(B2>=10000, B2*0.05, 0))</div>
         </div>
 
         <div id="ai-tutor" class="chapter">
-            <h2 style="border-color: var(--school-gold); color: var(--school-navy);">🤖 AI 智能出題 & 挑戰證書</h2>
+            <h2 style="border-bottom-color: var(--school-gold);">🤖 題目生成與練習</h2>
 
             <div class="progress-container">
-                <div class="progress-title">
-                    <span>🏆 挑戰進度：累積答對題數</span>
-                    <span id="progressText" style="color:var(--school-gold); font-size:1.2rem;">0 / 10</span>
+                <div style="display:flex; justify-content:space-between; font-weight:bold; color:var(--school-navy); margin-bottom:5px;">
+                    <span>🏆 挑戰進度 (累積答對)</span>
+                    <span id="progressText">0 / 10</span>
                 </div>
                 <div class="progress-bar-bg">
                     <div class="progress-bar-fill" id="progressBar"></div>
                 </div>
-                <div style="font-size:0.9rem; color:#666; margin-top:5px;">累積答對 10 題，即可獲得「試煉完成證書」！加油！</div>
             </div>
 
             <div class="ai-controls">
                 <div class="control-row">
-                    <div class="control-group" style="flex:2;">
-                        <label>🧠 選擇 AI 模型 (Model)：</label>
+                    <div class="control-group">
+                        <label>🧠 AI 模型：</label>
                         <select id="modelSelect">
-                            <option value="deepseek">DeepSeek V3 (推薦，速度快)</option>
-                            <option value="gpt5">GPT-3.5 Turbo (ChatAnywhere)</option>
+                            <option value="deepseek">DeepSeek (推薦)</option>
+                            <option value="gpt5">GPT-3.5 Turbo</option>
                         </select>
                     </div>
-                    <div class="control-group" style="flex:3;">
-                        <label>🌶️ 題目難度 (DSE Level)：</label>
+                    <div class="control-group">
+                        <label>🌶️ 難度等級：</label>
                         <select id="difficultySelect">
-                            <option value="1">Level 1: 基礎判斷 (文字/數字比較)</option>
-                            <option value="2">Level 2: 進階運算 (折扣/稅項計算)</option>
-                            <option value="3">Level 3: 高階挑戰 (巢狀 IF / AND / OR)</option>
+                            <option value="1">Lv 1: 基礎 (文字/數字比較)</option>
+                            <option value="2">Lv 2: 進階 (含運算)</option>
+                            <option value="3">Lv 3: 高階 (巢狀IF / 複合邏輯)</option>
                         </select>
                     </div>
                 </div>
 
                 <button class="btn-generate" id="genBtn" onclick="generateQuestion()">
                     <div class="spinner" id="genSpinner"></div>
-                    <span id="genBtnText" style="color:var(--school-navy);">✨ 召喚 AI 出題</span>
+                    <span id="genBtnText">生成練習題目</span>
                 </button>
             </div>
 
@@ -464,197 +318,172 @@
                 <h3 id="qTitle" style="margin-top:0; color:var(--school-navy);">題目載入中...</h3>
                 <p><strong>情境：</strong> <span id="qScenario"></span></p>
                 
-                <table class="excel-view">
-                    <thead><tr id="qHeader"></tr></thead>
-                    <tbody><tr id="qRow"></tr></tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="excel-view">
+                        <thead><tr id="qHeader"></tr></thead>
+                        <tbody><tr id="qRow"></tr></tbody>
+                    </table>
+                </div>
 
-                <div style="background:#f0f8ff; padding:15px; border-radius:8px; margin:15px 0; border-left:4px solid var(--school-navy);">
-                    <strong>🎯 任務：</strong> <span id="qTask"></span>
+                <div style="background:#f1f3f5; padding:15px; border-radius:6px; margin:15px 0; border-left:4px solid var(--school-navy);">
+                    <strong>🎯 任務要求：</strong> <span id="qTask"></span>
                 </div>
 
                 <div class="student-zone">
-                    <label style="font-weight:bold; color:var(--school-navy);">請輸入 Excel 公式 (C2)：</label>
-                    <input type="text" id="studentAnswer" class="formula-input" placeholder="=IF(...)">
+                    <label style="font-weight:bold; color:var(--school-navy);">輸入公式 (C2)：</label>
+                    <input type="text" id="studentAnswer" placeholder="=IF(...)">
                     
-                    <div class="action-buttons">
+                    <div class="action-buttons" style="margin-top:10px;">
                         <button class="btn-check" id="checkBtn" onclick="checkAnswer()">
                             <div class="spinner" id="checkSpinner"></div>
-                            <span id="checkBtnText">📝 提交檢查</span>
+                            <span id="checkBtnText">提交檢查</span>
                         </button>
-                        <button class="btn-save" onclick="downloadNote()">
-                            💾 下載筆記
-                        </button>
+                        <button class="btn-save" onclick="downloadNote()">下載筆記</button>
                     </div>
                 </div>
 
                 <div id="feedbackArea" class="feedback-box"></div>
-                
-                <div style="margin-top:15px; font-size:0.85em; color:#999; cursor:pointer; text-align:right;" onclick="toggleRefAnswer()">
-                    (老師專用鍵：偷看參考答案)
-                </div>
-                <div id="refAnswer" style="display:none; color:var(--school-navy); font-family:monospace; background:#eee; padding:10px; margin-top:5px; border-radius:4px;"></div>
+                <div id="refAnswer" style="display:none; color:var(--school-navy); font-family:monospace; background:#eee; padding:10px; margin-top:10px; border-radius:4px;"></div>
+                <div style="margin-top:15px; text-align:right; color:#999; font-size:0.85em; cursor:pointer;" onclick="toggleRefAnswer()">(顯示參考答案)</div>
             </div>
         </div>
     </div>
 
     <div id="certModal" class="certificate-modal">
-        <div class="certificate-content" style="animation: celebrate 0.8s ease-in-out;">
-            <div class="cert-header">✨ 試煉完成證書 ✨</div>
-            <div class="cert-sub">新界喇沙中學 - DSE ICT</div>
-            <div class="cert-body">
-                <p>恭喜同學！</p>
-                <p>你已成功在「IF 函數智能練功坊」中累積答對 <strong>10</strong> 題。</p>
-                <p>展現了對試算表邏輯判斷的卓越掌握能力。</p>
-                <div class="cert-seal">🏅</div>
+        <div class="certificate-content">
+            <div class="cert-header">CERTIFICATE</div>
+            <div class="cert-sub">OF COMPLETION</div>
+            <div style="font-size:1.1rem; margin:20px 0; line-height:1.6; color:#444;">
+                茲證明同學於<br>
+                <strong>新界喇沙中學 DSE ICT 智能學習平台</strong><br>
+                成功完成 10 題 IF 函數專題挑戰，<br>展現優異的邏輯思維能力。
             </div>
-            <div class="cert-date">頒發日期：<span id="certDate"></span></div>
-            <button class="btn-close-cert" onclick="closeCertificate()">收下證書，繼續挑戰！</button>
+            <div class="cert-seal">🏅</div>
+            <div style="color:#888; margin-top:20px; font-size:0.9rem;" id="certDate"></div>
+            <button class="btn-close-cert" onclick="closeCertificate()">關閉視窗</button>
         </div>
     </div>
 
     <script>
-        // --- API 設定 (內建 Keys - 教學用途) ---
+        // API Keys
         const API_CONFIG = {
-            gpt5: {
-                key: "sk-8zId7GKDaQjMQ8xTtez41xevJrAzsgP2hs3CACFUAFf8wnbe",
-                url: "https://api.chatanywhere.org/v1/chat/completions",
-                model: "gpt-3.5-turbo"
-            },
-            deepseek: {
-                key: "sk-ab9d14105cb443189e88d966f455fbaf",
-                url: "https://api.deepseek.com/chat/completions",
-                model: "deepseek-chat"
-            }
+            gpt5: { key: "sk-8zId7GKDaQjMQ8xTtez41xevJrAzsgP2hs3CACFUAFf8wnbe", url: "https://api.chatanywhere.org/v1/chat/completions", model: "gpt-3.5-turbo" },
+            deepseek: { key: "sk-ab9d14105cb443189e88d966f455fbaf", url: "https://api.deepseek.com/chat/completions", model: "deepseek-chat" }
         };
 
         let currentQuestionData = null;
-        let totalCorrect = 0; // 累計答對題數
+        let totalCorrect = 0;
+        let hasScoredCurrentQuestion = false;
 
-        // --- 導航 ---
+        // Sidebar Logic
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.querySelector('.overlay').classList.toggle('active');
+        }
         function showChapter(id) {
             document.querySelectorAll('.chapter').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             const btns = document.querySelectorAll('.nav-btn');
             btns.forEach(btn => { if(btn.getAttribute('onclick').includes(id)) btn.classList.add('active'); });
+            if (window.innerWidth <= 768) toggleSidebar();
         }
 
-        // --- 進度條與證書功能 ---
+        // Progress & Certificate
         function updateProgress(isCorrect) {
-            if (isCorrect) {
+            if (isCorrect && !hasScoredCurrentQuestion) {
                 totalCorrect++;
-                // 播放一個簡單的音效 (可選)
-                // let audio = new Audio('https://actions.google.com/sounds/v1/cartoon/pop.ogg'); audio.volume=0.2; audio.play();
+                hasScoredCurrentQuestion = true;
+                const checkBtn = document.getElementById('checkBtn');
+                checkBtn.disabled = true;
+                document.getElementById('checkBtnText').innerText = "✅ 本題已完成";
             }
-            // 更新 UI
-            const percentage = Math.min((totalCorrect / 10) * 100, 100);
-            document.getElementById('progressBar').style.width = percentage + "%";
+            const p = Math.min((totalCorrect / 10) * 100, 100);
+            document.getElementById('progressBar').style.width = p + "%";
             document.getElementById('progressText').innerText = totalCorrect + " / 10";
-
-            // 檢查是否達成 10 題
-            if (totalCorrect === 10 && isCorrect) {
-                showCertificate();
-            }
+            if (totalCorrect === 10 && isCorrect) showCertificate();
         }
 
         function showCertificate() {
             const now = new Date();
-            document.getElementById('certDate').innerText = now.getFullYear() + "年" + (now.getMonth()+1) + "月" + now.getDate() + "日";
+            document.getElementById('certDate').innerText = "頒發日期：" + now.getFullYear() + "年" + (now.getMonth()+1) + "月" + now.getDate() + "日";
             document.getElementById('certModal').style.display = "flex";
         }
+        function closeCertificate() { document.getElementById('certModal').style.display = "none"; }
 
-        function closeCertificate() {
-            document.getElementById('certModal').style.display = "none";
-            // 可選擇是否重置進度，這裡暫不重置，讓學生看到滿條
-            // totalCorrect = 0; updateProgress(false);
-        }
-
-
-        // --- 功能 1：生成題目 ---
+        // Generate Question
         async function generateQuestion() {
             const modelKey = document.getElementById('modelSelect').value;
-            const difficulty = document.getElementById('difficultySelect').value;
+            const diff = document.getElementById('difficultySelect').value;
             const config = API_CONFIG[modelKey];
             
             const btn = document.getElementById('genBtn');
-            const spinner = document.getElementById('genSpinner'); spinner.style.borderTopColor = "var(--school-navy)";
+            const spinner = document.getElementById('genSpinner');
             const btnText = document.getElementById('genBtnText');
             
-            btn.disabled = true;
-            spinner.style.display = "inline-block";
-            btnText.innerText = "AI 正在構思 DSE 題目...";
+            hasScoredCurrentQuestion = false;
+            const checkBtn = document.getElementById('checkBtn');
+            checkBtn.disabled = false;
+            document.getElementById('checkBtnText').innerText = "提交檢查";
+
+            btn.disabled = true; spinner.style.display = "inline-block"; btnText.innerText = "題目生成中...";
             document.getElementById('questionCard').style.display = "none";
             document.getElementById('studentAnswer').value = "";
             document.getElementById('feedbackArea').style.display = "none";
             document.getElementById('refAnswer').style.display = "none";
 
-            // DSE 難度 Prompt
-            let diffDesc = "";
-            if (difficulty === "1") diffDesc = "難度：DSE 基礎題 (Level 2)。使用基本的 IF 判斷，例如判斷及格/不及格、正數/負數，回傳文字或簡單數字。";
-            if (difficulty === "2") diffDesc = "難度：DSE 進階題 (Level 3-4)。必須包含數學運算，例如計算折扣後的價錢、運費計算、或稅項。";
-            if (difficulty === "3") diffDesc = "難度：DSE 高階題 (Level 5**)。請出一題複雜的「巢狀 IF (3個以上結果)」或者結合「AND/OR 複合邏輯」的題目。";
+            // Random Topics
+            const topics = [
+                "校園生活 (如: 測驗分數、社制計分)",
+                "日常消費 (如: 超市優惠、PayMe回贈)",
+                "交通運輸 (如: 港鐵學生優惠、的士收費)",
+                "商業應用 (如: 運費計算、員工薪酬)",
+                "活動策劃 (如: 比賽資格、門票價格)"
+            ];
+            const randomTopic = topics[Math.floor(Math.random() * topics.length)];
 
-            const systemPrompt = `你是一位資深的香港 DSE ICT 科老師。請設計一個 Excel IF 函數題目給學生練習。
-            ${diffDesc}
-            請以繁體中文 (香港用語) 回傳純 JSON 格式 (切勿使用 Markdown code block)。
-            JSON 結構:
-            {
-                "title": "題目短標題",
-                "scenario": "情境描述 (約 30-50 字)",
-                "headers": ["A欄名", "B欄名", "C欄名(結果欄)"],
-                "row_data": ["數據1", "數據2", "?"],
-                "task": "請描述要在 C2 儲存格填入的公式要求",
-                "ref_formula": "標準答案公式"
-            }`;
+            let diffDesc = "";
+            if(diff==="1") diffDesc = "DSE Level 2 基礎 (簡單IF)";
+            if(diff==="2") diffDesc = "DSE Level 3-4 進階 (含數學運算)";
+            if(diff==="3") diffDesc = "DSE Level 5 高階 (巢狀IF/複合邏輯)";
+
+            const sysPrompt = `你是一位香港 DSE ICT 老師。請出一個 Excel IF 函數題目。
+            情境：${randomTopic}。難度：${diffDesc}。
+            確保使用繁體中文及香港用語。
+            回傳純 JSON：{"title":"標題","scenario":"描述","headers":["A","B","C"],"row_data":["1","2","?"],"task":"C2公式要求","ref_formula":"答案"}`;
 
             try {
-                const response = await fetch(config.url, {
+                const res = await fetch(config.url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.key}` },
                     body: JSON.stringify({
                         model: config.model,
-                        messages: [{ role: "system", content: systemPrompt }, { role: "user", content: "請出一題" }],
-                        temperature: 0.8
+                        messages: [{ role: "system", content: sysPrompt }, { role: "user", content: "一題" }],
+                        temperature: 0.9
                     })
                 });
-
-                const data = await response.json();
+                const data = await res.json();
                 if(data.error) throw new Error(data.error.message);
                 let content = data.choices[0].message.content.replace(/```json/g, '').replace(/```/g, '').trim();
-                
                 currentQuestionData = JSON.parse(content);
-                currentQuestionData.difficulty = difficulty;
-                renderQuestion(currentQuestionData);
+                
+                document.getElementById('qTitle').innerText = currentQuestionData.title;
+                document.getElementById('qScenario').innerText = currentQuestionData.scenario;
+                document.getElementById('qTask').innerText = currentQuestionData.task;
+                document.getElementById('refAnswer').innerText = currentQuestionData.ref_formula;
+                document.getElementById('levelBadge').innerText = "難度 " + "🌶️".repeat(parseInt(diff));
+
+                const th = `<th>1</th>` + currentQuestionData.headers.map(h => `<th>${h}</th>`).join('');
+                document.getElementById('qHeader').innerHTML = th;
+                const tr = `<th>2</th>` + currentQuestionData.row_data.map((d, i) => i === currentQuestionData.row_data.length - 1 ? `<td style="background:#fff9e6; font-weight:bold; border:2px solid var(--school-gold);">?</td>` : `<td>${d}</td>`).join('');
+                document.getElementById('qRow').innerHTML = tr;
+                document.getElementById('questionCard').style.display = "block";
 
             } catch (e) {
-                alert("生成失敗，請稍後再試。\n錯誤：" + e.message);
+                alert("連線錯誤: " + e.message);
             } finally {
-                btn.disabled = false;
-                spinner.style.display = "none";
-                btnText.innerText = "✨ 召喚 AI 出題";
+                btn.disabled = false; spinner.style.display = "none"; btnText.innerText = "生成練習題目";
             }
-        }
-
-        function renderQuestion(data) {
-            document.getElementById('qTitle').innerText = data.title;
-            document.getElementById('qScenario').innerText = data.scenario;
-            document.getElementById('qTask').innerText = data.task;
-            document.getElementById('refAnswer').innerText = data.ref_formula;
-            
-            const peppers = "🌶️".repeat(parseInt(data.difficulty));
-            document.getElementById('levelBadge').innerText = `難度: ${peppers}`;
-
-            const subHeaderHtml = `<th>1</th>` + data.headers.map(h => `<th>${h}</th>`).join('');
-            document.getElementById('qHeader').innerHTML = subHeaderHtml;
-
-            const rowHtml = `<th>2</th>` + data.row_data.map((d, i) => {
-                if (i === data.row_data.length - 1) return `<td style="background:#fff9e6; font-weight:bold; color:var(--school-navy); border:2px solid var(--school-gold);">?</td>`; 
-                return `<td>${d}</td>`;
-            }).join('');
-            document.getElementById('qRow').innerHTML = rowHtml;
-
-            document.getElementById('questionCard').style.display = "block";
         }
 
         function toggleRefAnswer() {
@@ -662,35 +491,24 @@
             el.style.display = el.style.display === 'none' ? 'block' : 'none';
         }
 
-        // --- 功能 2：檢查答案 (含進度更新) ---
+        // Check Answer
         async function checkAnswer() {
-            const studentAns = document.getElementById('studentAnswer').value.trim();
-            if (!studentAns) { alert("請先輸入公式！"); return; }
-            if (!currentQuestionData) return;
-
-            const modelKey = document.getElementById('modelSelect').value;
-            const config = API_CONFIG[modelKey];
+            const ans = document.getElementById('studentAnswer').value.trim();
+            if(!ans) { alert("請輸入公式"); return; }
             
+            const config = API_CONFIG[document.getElementById('modelSelect').value];
             const btn = document.getElementById('checkBtn');
             const spinner = document.getElementById('checkSpinner');
             const btnText = document.getElementById('checkBtnText');
-            const feedbackDiv = document.getElementById('feedbackArea');
+            const fb = document.getElementById('feedbackArea');
 
-            btn.disabled = true; spinner.style.display = "inline-block"; btnText.innerText = "AI 批改中...";
-            feedbackDiv.style.display = "none";
+            btn.disabled = true; spinner.style.display = "inline-block"; btnText.innerText = "批改中...";
+            fb.style.display = "none";
 
-            const prompt = `
-            我是 DSE ICT 老師。請批改學生的 Excel 公式。
-            情境：${currentQuestionData.scenario}
-            要求：${currentQuestionData.task}
-            參考答案：${currentQuestionData.ref_formula}
-            學生輸入：${studentAns}
-            請回傳 JSON: { "is_correct": boolean, "comment": "給學生的簡短評語(繁體中文)，指出語法錯誤或給予鼓勵" }
-            注意：只要邏輯正確，些微空格或大小寫差異可視為正確。
-            `;
+            const prompt = `題目:${currentQuestionData.scenario}, 要求:${currentQuestionData.task}, 答案:${currentQuestionData.ref_formula}, 學生輸入:${ans}。請回傳JSON: {"is_correct":boolean, "comment":"繁體中文評語"}`;
 
             try {
-                const response = await fetch(config.url, {
+                const res = await fetch(config.url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.key}` },
                     body: JSON.stringify({
@@ -699,62 +517,32 @@
                         temperature: 0.3
                     })
                 });
-
-                const data = await response.json();
+                const data = await res.json();
                 let content = data.choices[0].message.content.replace(/```json/g, '').replace(/```/g, '').trim();
                 const result = JSON.parse(content);
-
-                feedbackDiv.style.display = "block";
-                feedbackDiv.innerText = (result.is_correct ? "🎉 正確！" : "🤔 需要修正：") + " " + result.comment;
-                feedbackDiv.className = result.is_correct ? "feedback-box feedback-correct" : "feedback-box feedback-wrong";
                 
-                // 更新進度條
+                fb.style.display = "block";
+                fb.innerHTML = (result.is_correct ? "✅ 正確！" : "⚠️ 需修正：") + result.comment;
+                fb.className = result.is_correct ? "feedback-box feedback-correct" : "feedback-box feedback-wrong";
+                
                 updateProgress(result.is_correct);
-
+                if (!result.is_correct) {
+                     btn.disabled = false; spinner.style.display = "none"; btnText.innerText = "再試一次";
+                } else {
+                    spinner.style.display = "none";
+                }
             } catch (e) {
-                alert("批改失敗：" + e.message);
-            } finally {
-                btn.disabled = false; spinner.style.display = "none"; btnText.innerText = "📝 提交檢查";
+                alert("批改錯誤: " + e.message);
+                btn.disabled = false; spinner.style.display = "none"; btnText.innerText = "提交檢查";
             }
         }
 
-        // --- 功能 3：下載筆記 ---
         function downloadNote() {
-            if (!currentQuestionData) return;
-            const title = currentQuestionData.title;
-            const studentAns = document.getElementById('studentAnswer').value || "(未作答)";
-            
-            const content = `
-=========================================
-🏫 新界喇沙中學 - DSE ICT 溫習筆記
-=========================================
-課題：Excel IF 函數應用
-題目：${title}
-難度等級：${"🌶️".repeat(parseInt(currentQuestionData.difficulty))}
-日期：${new Date().toLocaleDateString()}
-
-【情境描述】
-${currentQuestionData.scenario}
-
-【題目要求】
-${currentQuestionData.task}
-
-【數據結構】
-欄位：${currentQuestionData.headers.join(" | ")}
-範例數據：${currentQuestionData.row_data.join(" | ")}
-
------------------------------------------
-💡 參考公式 (Model Answer)：
-${currentQuestionData.ref_formula}
-
-✍️ 你的嘗試：
-${studentAns}
-=========================================
-`;
-            const blob = new Blob([content], { type: "text/plain" });
-            const url = URL.createObjectURL(blob);
+            if(!currentQuestionData) return;
+            const txt = `🏫 新界喇沙中學 DSE ICT 筆記\n題目: ${currentQuestionData.title}\n情境: ${currentQuestionData.scenario}\n要求: ${currentQuestionData.task}\n你的公式: ${document.getElementById('studentAnswer').value}\n參考公式: ${currentQuestionData.ref_formula}`;
             const a = document.createElement("a");
-            a.href = url; a.download = `LaSalle_Excel練習_${title}.txt`;
+            a.href = URL.createObjectURL(new Blob([txt], { type: "text/plain" }));
+            a.download = `LaSalle_DSE_${currentQuestionData.title}.txt`;
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
         }
     </script>
