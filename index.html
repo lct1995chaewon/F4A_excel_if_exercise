@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>新界喇沙中學 - DSE ICT 智能學習平台</title>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         :root {
             /* --- 校本色調 (La Salle Colors) --- */
@@ -179,7 +180,7 @@
         .progress-bar-bg { height: 10px; background: #e9ecef; border-radius: 5px; overflow: hidden; margin-top: 8px;}
         .progress-bar-fill { height: 100%; background: var(--school-navy); width: 0%; transition: width 0.5s; }
 
-        /* 證書 */
+        /* 證書樣式 */
         .certificate-modal {
             display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
             background-color: rgba(0,40,85, 0.9); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;
@@ -192,9 +193,18 @@
         .cert-header { font-size: 2rem; color: var(--school-navy); font-weight: 900; margin-bottom: 5px; letter-spacing: 2px;}
         .cert-sub { font-size: 1.2rem; color: #666; margin-bottom: 30px; font-weight: 600; text-transform: uppercase;}
         .cert-seal { font-size: 5rem; margin-top: 20px; color: var(--school-gold);}
-        .btn-close-cert {
-            background: var(--school-navy); color: white; border: none; padding: 10px 30px;
-            font-size: 1rem; border-radius: 4px; cursor: pointer; margin-top: 30px;
+        
+        /* 證書按鈕群組 */
+        .cert-actions {
+            margin-top: 30px; display: flex; gap: 10px; justify-content: center;
+        }
+        .btn-cert-download {
+            background: var(--school-gold); color: var(--school-navy); border: none; padding: 10px 25px;
+            font-size: 1rem; border-radius: 4px; cursor: pointer; font-weight: bold;
+        }
+        .btn-cert-close {
+            background: var(--school-navy); color: white; border: none; padding: 10px 25px;
+            font-size: 1rem; border-radius: 4px; cursor: pointer;
         }
 
         @media (max-width: 768px) {
@@ -205,6 +215,7 @@
             .main-content { padding: 60px 20px 30px 20px; }
             .chapter { padding: 20px; }
             .control-row { flex-direction: column; gap: 10px; }
+            .cert-header { font-size: 1.5rem; }
         }
     </style>
 </head>
@@ -311,7 +322,7 @@
                     <div class="spinner" id="genSpinner"></div>
                     <span id="genBtnText">生成練習題目</span>
                 </button>
-            </div>
+                </div>
 
             <div id="questionCard" class="question-card">
                 <div id="levelBadge" class="level-badge"></div>
@@ -350,7 +361,7 @@
     </div>
 
     <div id="certModal" class="certificate-modal">
-        <div class="certificate-content">
+        <div class="certificate-content" id="certContent">
             <div class="cert-header">CERTIFICATE</div>
             <div class="cert-sub">OF COMPLETION</div>
             <div style="font-size:1.1rem; margin:20px 0; line-height:1.6; color:#444;">
@@ -360,7 +371,11 @@
             </div>
             <div class="cert-seal">🏅</div>
             <div style="color:#888; margin-top:20px; font-size:0.9rem;" id="certDate"></div>
-            <button class="btn-close-cert" onclick="closeCertificate()">關閉視窗</button>
+            
+            <div class="cert-actions">
+                <button class="btn-cert-download" onclick="downloadCertificate()">📥 下載證書圖片</button>
+                <button class="btn-cert-close" onclick="closeCertificate()">關閉視窗</button>
+            </div>
         </div>
     </div>
 
@@ -410,6 +425,32 @@
             document.getElementById('certModal').style.display = "flex";
         }
         function closeCertificate() { document.getElementById('certModal').style.display = "none"; }
+
+        // Download Certificate Logic (using html2canvas)
+        function downloadCertificate() {
+            const element = document.getElementById('certContent');
+            // 先隱藏按鈕
+            const actions = document.querySelector('.cert-actions');
+            actions.style.display = 'none';
+
+            html2canvas(element, {
+                scale: 3, // 提高解析度
+                backgroundColor: "#ffffff",
+                useCORS: true
+            }).then(canvas => {
+                // 建立下載連結
+                const link = document.createElement('a');
+                link.download = 'LaSalle_Certificate.png';
+                link.href = canvas.toDataURL();
+                link.click();
+                
+                // 恢復顯示按鈕
+                actions.style.display = 'flex';
+            }).catch(err => {
+                alert("下載失敗，請截圖保存。");
+                actions.style.display = 'flex';
+            });
+        }
 
         // Generate Question
         async function generateQuestion() {
